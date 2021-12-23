@@ -15,10 +15,6 @@ st.set_page_config(layout="wide")
 
 default_dataset = st.selectbox("Select one of our sample reviews dataset", (
         "mussorie_reviews", "jaipur_reviews", "goa_reviews", "shimla_reviews"))
-    
-
-user_input = st.text_input(
-        "Input your own Tripadvisor hotel Link (e.g. https://www.tripadvisor.in/Hotel_Review-g297689-d1575197-Reviews-Fortune_Resort_Grace_Mall_Road_Mussoorie-Mussoorie_Dehradun_District_Uttarakhand.html)")
 
 # Loading the dataset
 reviews_dataset = pd.read_csv("reviews_analysis/{}.csv".format(default_dataset), header=None, names=['Review', 'Date of stay', 'Rating'])
@@ -28,8 +24,6 @@ reviews_dataset.head()
 reviews_dataset.info()
 
 rows = reviews_dataset.shape[0]
-
-st.markdown('There are a total of {} entries in the dataset.')
 
 # Dropping all the rows with null values
 reviews_dataset.dropna(inplace=True)
@@ -48,6 +42,12 @@ reviews_dataset["Rating"].value_counts(normalize = True)
 
 # Mapping positive, neutral and negative to rating values 
 reviews_dataset["Sentiment"] = reviews_dataset["Rating"].map({"5":"Positive", "4":"Positive", "3":"Neutral", "2":"Negative", "1":"Negative"})
+
+pos = reviews_dataset[reviews_dataset["Sentiment"] == "Positive"].shape[0]
+neg = reviews_dataset[reviews_dataset["Sentiment"] == "Negative"].shape[0]
+st.markdown('There are a total of {} entries in the dataset.'.format(rows))
+st.markdown('There are {} positive sentiment entries and {} negative sentiment entries in the dataset.'.format(pos, neg))
+
 
 # Creating a new column year of stay from our existing column date of stay
 reviews_dataset["Year of stay"] = reviews_dataset["Date of stay"].apply(lambda x: "".join(re.findall("\d\d\d\d", x)))
@@ -145,7 +145,7 @@ for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment
 df_positive_unigrams = pd.DataFrame(sorted(positive_unigrams.items(), key=lambda x: x[1])[::-1])
 df_negative_unigrams = pd.DataFrame(sorted(negative_unigrams.items(), key=lambda x: x[1])[::-1])
 
-st.subheader('What are most common words in positive and negative reviews?')
+st.subheader('What are the most common words in positive and negative reviews?')
 
 fig2, axes2 = plt.subplots(ncols=2, figsize=(24, 10))
 plt.tight_layout(pad=4.0)
@@ -179,7 +179,7 @@ for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment
 df_positive_bigrams = pd.DataFrame(sorted(positive_bigrams.items(), key=lambda x: x[1])[::-1])
 df_negative_bigrams = pd.DataFrame(sorted(negative_bigrams.items(), key=lambda x: x[1])[::-1])
 
-st.subheader('What are most common two word groups in positive and negative reviews?')
+st.subheader('What are the most common two word groups in positive and negative reviews?')
      
 fig3, axes3 = plt.subplots(ncols=2, figsize=(24, 10))
 plt.tight_layout(pad=4.0)
@@ -213,7 +213,7 @@ for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment
 df_positive_trigrams = pd.DataFrame(sorted(positive_trigrams.items(), key=lambda x: x[1])[::-1])
 df_negative_trigrams = pd.DataFrame(sorted(negative_trigrams.items(), key=lambda x: x[1])[::-1])
 
-st.subheader('What are most common three word groups in positive and negative reviews?')
+st.subheader('What are the most common three word groups in positive and negative reviews?')
 
 fig4, axes4 = plt.subplots(ncols=2, figsize=(24, 10))
 plt.tight_layout(pad=4.0)
