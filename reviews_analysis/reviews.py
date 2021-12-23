@@ -45,7 +45,6 @@ reviews_dataset["Sentiment"] = reviews_dataset["Rating"].map({"5":"Positive", "4
 
 pos = reviews_dataset[reviews_dataset["Sentiment"] == "Positive"].shape[0]
 neg = reviews_dataset[reviews_dataset["Sentiment"] == "Negative"].shape[0]
-st.markdown('There are a total of {} entries in the dataset.'.format(rows))
 st.markdown('There are {} positive sentiment entries and {} negative sentiment entries in the dataset.'.format(pos, neg))
 
 
