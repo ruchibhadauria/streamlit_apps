@@ -9,6 +9,8 @@ import re
 from wordcloud import WordCloud, STOPWORDS
 import streamlit as st
 
+st.set_page_config(layout="wide")
+
 # Loading the dataset
 reviews_dataset = pd.read_csv('reviews_analysis/mussorie_reviews.csv', header=None, names=['Review', 'Date of stay', 'Rating'])
 reviews_dataset.head()
