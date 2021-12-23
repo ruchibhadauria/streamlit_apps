@@ -10,8 +10,12 @@ from wordcloud import WordCloud, STOPWORDS
 import streamlit as st
 
 
+def load_data():
+    df = pd.read_csv("streamlit_apps/reviews_analysis/mussorie_reviews.csv", header=None, names=['Review', 'Date of stay', 'Rating'])
+    return df
+
 # Loading the dataset
-reviews_dataset = pd.read_csv("streamlit_apps/reviews_analysis/mussorie_reviews.csv", header=None, names=['Review', 'Date of stay', 'Rating'])
+reviews_dataset = load_data()
 reviews_dataset.head()
 
 # Checking information about the dataset
