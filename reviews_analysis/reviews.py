@@ -11,7 +11,7 @@ import streamlit as st
 
 
 # Loading the dataset
-reviews_dataset = pd.read_csv("C:/Users/Dell/Downloads/mussorie_reviews.csv", header=None, names=['Review', 'Date of stay', 'Rating'])
+reviews_dataset = pd.read_csv("mussorie_reviews.csv", header=None, names=['Review', 'Date of stay', 'Rating'])
 reviews_dataset.head()
 
 # Checking information about the dataset
