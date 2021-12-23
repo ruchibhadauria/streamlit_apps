@@ -102,18 +102,6 @@ reviews_dataset["Char_count"] = reviews_dataset["Review"].apply(lambda x: len(st
 # punctuation count
 reviews_dataset["Punctuation_count"] = reviews_dataset["Review"].apply(lambda x: len([p for p in str(x) if p in string.punctuation]))
 
-
-# Creating a pie chart showing target distribution in dataset
-labels = 'Positive', 'Negative'
-sizes = reviews_dataset['Sentiment'].value_counts()
-explode = (0.1, 0)  # only "explode" the 2nd slice (i.e. 'Hogs')
-
-fig1, ax1 = plt.subplots()
-ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%', shadow=True, startangle=90)
-ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-st.pyplot(fig1)
-
-
 # Funtion for generating ngrams
 def generate_ngrams(text, n_gram=1):
     """
