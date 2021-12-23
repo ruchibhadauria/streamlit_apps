@@ -6,13 +6,22 @@ import seaborn as sns
 from collections import defaultdict
 import string
 import re
+import matplotlib
+from matplotlib.backends.backend_agg import RendererAgg
 from wordcloud import WordCloud, STOPWORDS
 import streamlit as st
 
 st.set_page_config(layout="wide")
 
+default_dataset = st.selectbox("Select one of our sample reviews dataset", (
+        "mussorie_reviews", "jaipur_reviews", "goa_reviews", "shimla_reviews"))
+    
+
+user_input = st.text_input(
+        "Input your own Tripadvisor hotel Link (e.g. https://www.tripadvisor.in/Hotel_Review-g297689-d1575197-Reviews-Fortune_Resort_Grace_Mall_Road_Mussoorie-Mussoorie_Dehradun_District_Uttarakhand.html)")
+
 # Loading the dataset
-reviews_dataset = pd.read_csv('reviews_analysis/mussorie_reviews.csv', header=None, names=['Review', 'Date of stay', 'Rating'])
+reviews_dataset = pd.read_csv("reviews_analysis/{}.csv".format(default_dataset), header=None, names=['Review', 'Date of stay', 'Rating'])
 reviews_dataset.head()
 
 # Checking information about the dataset
@@ -20,7 +29,7 @@ reviews_dataset.info()
 
 rows = reviews_dataset.shape[0]
 
-print('There are a total of {} entries in the dataset.'.format(rows))
+st.markdown('There are a total of {} entries in the dataset.')
 
 # Dropping all the rows with null values
 reviews_dataset.dropna(inplace=True)
@@ -40,12 +49,11 @@ reviews_dataset["Rating"].value_counts(normalize = True)
 # Mapping positive, neutral and negative to rating values 
 reviews_dataset["Sentiment"] = reviews_dataset["Rating"].map({"5":"Positive", "4":"Positive", "3":"Neutral", "2":"Negative", "1":"Negative"})
 
-
 # Creating a new column year of stay from our existing column date of stay
-reviews_dataset["Year of stay"] = reviews_dataset["Date of stay"].apply(lambda x: "".join(re.findall("\d", x)))
+reviews_dataset["Year of stay"] = reviews_dataset["Date of stay"].apply(lambda x: "".join(re.findall("\d\d\d\d", x)))
 
 # Creating a month of stay column from date of stay column
-reviews_dataset["Month of stay"] = reviews_dataset["Date of stay"].apply(lambda x: x.split(" ")[3])
+reviews_dataset["Month of stay"] = reviews_dataset["Date of stay"].apply(lambda x: "".join(re.findall(r'(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)', x)))
 
 # Dropping all rows for which year is less than 2018
 reviews_dataset.drop(reviews_dataset[reviews_dataset["Year of stay"] < '2018'].index, axis=0, inplace=True)
@@ -122,7 +130,7 @@ positive_unigrams = defaultdict(int)
 negative_unigrams = defaultdict(int)
 
 # Number of ngrams we want
-N = 25
+N = st.slider('Number of ngrams', 1, 50, 20)
 
 # Loop for updating value of positive_unigrams
 for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment']=="Positive"]:
@@ -137,7 +145,8 @@ for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment
 df_positive_unigrams = pd.DataFrame(sorted(positive_unigrams.items(), key=lambda x: x[1])[::-1])
 df_negative_unigrams = pd.DataFrame(sorted(negative_unigrams.items(), key=lambda x: x[1])[::-1])
 
-        
+st.subheader('What are most common words in positive and negative reviews?')
+
 fig2, axes2 = plt.subplots(ncols=2, figsize=(24, 10))
 plt.tight_layout(pad=4.0)
 
@@ -157,9 +166,6 @@ st.pyplot(fig2)
 positive_bigrams = defaultdict(int)
 negative_bigrams = defaultdict(int)
 
-# Number of ngrams we want
-N = 25
-
 # Loop for updating values of bigrams in default dictionary
 for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment']=="Positive"]:
     for word in generate_ngrams(review, n_gram=2):
@@ -172,7 +178,9 @@ for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment
 # Creating a dataset using default dictionaries
 df_positive_bigrams = pd.DataFrame(sorted(positive_bigrams.items(), key=lambda x: x[1])[::-1])
 df_negative_bigrams = pd.DataFrame(sorted(negative_bigrams.items(), key=lambda x: x[1])[::-1])
-        
+
+st.subheader('What are most common two word groups in positive and negative reviews?')
+     
 fig3, axes3 = plt.subplots(ncols=2, figsize=(24, 10))
 plt.tight_layout(pad=4.0)
  
@@ -192,9 +200,6 @@ st.pyplot(fig3)
 positive_trigrams = defaultdict(int)
 negative_trigrams = defaultdict(int)
 
-# Number of ngrams we want
-N = 25
-
 # Loop for updating default dictionaries 
 for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment']=="Positive"]:
     for word in generate_ngrams(review, n_gram=3):
@@ -207,7 +212,9 @@ for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment
 # Creating a dataframe using dictionaries
 df_positive_trigrams = pd.DataFrame(sorted(positive_trigrams.items(), key=lambda x: x[1])[::-1])
 df_negative_trigrams = pd.DataFrame(sorted(negative_trigrams.items(), key=lambda x: x[1])[::-1])
-        
+
+st.subheader('What are most common three word groups in positive and negative reviews?')
+
 fig4, axes4 = plt.subplots(ncols=2, figsize=(24, 10))
 plt.tight_layout(pad=4.0)
      
@@ -221,24 +228,25 @@ axes4[1].set_title(f'Top {N} most common trigrams in Negative Reviews', fontsize
 
 st.pyplot(fig4)
 
-
+st.subheader('What are the number of reviews in each month?')
 # Plotting number of reviews in each month
 fig5 = plt.figure(figsize = (24, 5))
 month =['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 sns.despine()
 sns.countplot(x="Month of stay", data=reviews_dataset, order=month, color='#62DCEC');
 st.pyplot(fig5)
-"""**Month of January and October has the highest number of reviews so we can say that number of people staying in hotel in these month is more compared to other months. Month of April has the  lowest number of reviews.**"""
+"""**** """
 
-
+st.subheader('What are the number of reviews in each year?')
 # Plotting number of reviews for each year
 fig6 = plt.figure(figsize = (24, 5))
 years = ['2018', '2019', '2020', '2021']
 sns.despine()
 sns.countplot(x="Year of stay", data=reviews_dataset, order=years, color='#62DCEC');
 st.pyplot(fig6)
-"""**2019 has the highest number of reviews whereas 2020 has the lowest because of global pandemic.**"""
+"""****"""
 
+st.subheader('What is the count of words in reviews?')
 # Plotting word count for reviews
 fig6, axes6 = plt.subplots(ncols = 2, figsize=(24, 6))
 
@@ -254,9 +262,10 @@ axes6[1].set_ylabel("Number of reviews", fontsize=12)
 axes6[0].set_xlabel("Word count in review", fontsize=12)
 axes6[1].set_xlabel("Word count in review", fontsize=12)
 
-fig6.suptitle("Word count for reviews", fontsize=20)
 st.pyplot(fig6)
 
+
+st.subheader('What is the count of unique words in reviews?')
 # Plotting unique word count for reviews
 fig7, axes7 = plt.subplots(ncols = 2, figsize=(24, 6))
 
@@ -276,78 +285,56 @@ fig7.suptitle("Unique word count for reviews", fontsize=20)
 st.pyplot(fig7)
 
 
-# Plotting stopword count for reviews
-fig8, axes8 = plt.subplots(ncols = 2, figsize=(24, 6))
+# # Plotting stopword count for reviews
+# fig8, axes8 = plt.subplots(ncols = 2, figsize=(24, 6))
 
-sns.despine()
-sns.histplot(ax=axes8[0], x="Stopword_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Positive'], color='#72EEA4');
-sns.histplot(ax=axes8[1], x="Stopword_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Negative'], color='#F37D67');
+# sns.despine()
+# sns.histplot(ax=axes8[0], x="Stopword_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Positive'], color='#72EEA4');
+# sns.histplot(ax=axes8[1], x="Stopword_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Negative'], color='#F37D67');
 
-axes8[0].set_title("Positive reviews", fontsize=16)
-axes8[1].set_title("Negative reviews", fontsize=16)
+# axes8[0].set_title("Positive reviews", fontsize=16)
+# axes8[1].set_title("Negative reviews", fontsize=16)
 
-axes8[0].set_ylabel("Number of reviews", fontsize=12)
-axes8[1].set_ylabel("Number of reviews", fontsize=12)
-axes8[0].set_xlabel("Stopword count in review", fontsize=12)
-axes8[1].set_xlabel("Stopword count in review", fontsize=12)
+# axes8[0].set_ylabel("Number of reviews", fontsize=12)
+# axes8[1].set_ylabel("Number of reviews", fontsize=12)
+# axes8[0].set_xlabel("Stopword count in review", fontsize=12)
+# axes8[1].set_xlabel("Stopword count in review", fontsize=12)
 
-fig8.suptitle("Stopword count for reviews", fontsize=20)
-st.pyplot(fig8)
+# st.pyplot(fig8)
 
-# Plotting character count for reviews
-fig9, axes9 = plt.subplots(ncols = 2, figsize=(24, 6))
+# st.subheader('What is the count of character in reviews?')
+# # Plotting character count for reviews
+# fig9, axes9 = plt.subplots(ncols = 2, figsize=(24, 6))
 
-sns.despine()
-sns.histplot(ax=axes9[0], x="Char_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Positive'], color='#72EEA4');
-sns.histplot(ax=axes9[1], x="Char_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Negative'], color='#F37D67');
+# sns.despine()
+# sns.histplot(ax=axes9[0], x="Char_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Positive'], color='#72EEA4');
+# sns.histplot(ax=axes9[1], x="Char_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Negative'], color='#F37D67');
 
-axes9[0].set_title("Positive reviews", fontsize=16)
-axes9[1].set_title("Negative reviews", fontsize=16)
+# axes9[0].set_title("Positive reviews", fontsize=16)
+# axes9[1].set_title("Negative reviews", fontsize=16)
 
-axes9[0].set_ylabel("Number of reviews", fontsize=12)
-axes9[1].set_ylabel("Number of reviews", fontsize=12)
-axes9[0].set_xlabel("Character count in review", fontsize=12)
-axes9[1].set_xlabel("Character count in review", fontsize=12)
+# axes9[0].set_ylabel("Number of reviews", fontsize=12)
+# axes9[1].set_ylabel("Number of reviews", fontsize=12)
+# axes9[0].set_xlabel("Character count in review", fontsize=12)
+# axes9[1].set_xlabel("Character count in review", fontsize=12)
 
-fig9.suptitle("Character count for reviews", fontsize=20)
-st.pyplot(fig9)
+# st.pyplot(fig9)
 
-
-# Plotting punctuation count for reviews
-fig22, axes22 = plt.subplots(ncols = 2, figsize=(24, 6))
-
-sns.despine()
-sns.histplot(ax=axes22[0], x="Punctuation_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Positive'], color='#72EEA4');
-sns.histplot(ax=axes22[1], x="Punctuation_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Negative'], color='#F37D67');
-
-axes22[0].set_title("Positive reviews", fontsize=16)
-axes22[1].set_title("Negative reviews", fontsize=16)
-axes22[0].set_xscale('log')
-
-axes22[0].set_ylabel("Number of reviews", fontsize=12)
-axes22[1].set_ylabel("Number of reviews", fontsize=12)
-axes22[0].set_xlabel("Punctuation count in review", fontsize=12)
-axes22[1].set_xlabel("Punctuation count in review", fontsize=12)
-
-fig22.suptitle("Punctuation count for reviews", fontsize=20)
-st.pyplot(fig22)
-
-
+st.subheader('What are the most common words in positive reviews?')
 # Plotting a wordcloud for positive reviews
 positive = " ".join(review for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment']=="Positive"])
-wordcloud = WordCloud(background_color='white', stopwords = STOPWORDS, max_words=500, max_font_size=40, random_state=42, colormap='Greens').generate(positive)
+wordcloud = WordCloud(background_color='white', stopwords = STOPWORDS, max_words=500, max_font_size=40, random_state=42, colormap='Greens', width=1600, height=300).generate(positive)
 fig33 = plt.figure(figsize=(15, 10))
-plt.title("Most common words in positive reviews")
 plt.imshow(wordcloud, interpolation='bilinear')
 plt.axis("off")
 st.pyplot(fig33)
 
 
+st.subheader('What are the most common words in negative reviews?')
 # Plotting wordcloud for negative reviews
 negative = " ".join(review for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment']=="Negative"])
-wordcloud = WordCloud(background_color='white', stopwords = STOPWORDS, max_words=500, max_font_size=40, random_state=42, colormap = "Reds").generate(negative)
+wordcloud = WordCloud(background_color='white', stopwords = STOPWORDS, max_words=900, max_font_size=40, random_state=42, colormap = "Reds", width=1600, height=300).generate(negative)
 fig44 = plt.figure(figsize=(15, 10))
-plt.title("Most common words in negative reviews")
 plt.imshow(wordcloud, interpolation='bilinear')
 plt.axis("off")
 st.pyplot(fig44)
