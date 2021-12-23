@@ -14,7 +14,7 @@ import streamlit as st
 st.set_page_config(layout="wide")
 
 default_dataset = st.selectbox("Select one of our sample reviews dataset", (
-        "mussorie_reviews", "jaipur_reviews", "goa_reviews", "shimla_reviews", "darjeeling_reviews))
+        "mussorie_reviews", "jaipur_reviews", "goa_reviews", "shimla_reviews", "darjeeling_reviews"))
 
 # Loading the dataset
 reviews_dataset = pd.read_csv("reviews_analysis/{}.csv".format(default_dataset), header=None, names=['Review', 'Date of stay', 'Rating'])
