@@ -284,42 +284,6 @@ axes7[1].set_xlabel("Unique word count in review", fontsize=12)
 fig7.suptitle("Unique word count for reviews", fontsize=20)
 st.pyplot(fig7)
 
-
-# # Plotting stopword count for reviews
-# fig8, axes8 = plt.subplots(ncols = 2, figsize=(24, 6))
-
-# sns.despine()
-# sns.histplot(ax=axes8[0], x="Stopword_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Positive'], color='#72EEA4');
-# sns.histplot(ax=axes8[1], x="Stopword_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Negative'], color='#F37D67');
-
-# axes8[0].set_title("Positive reviews", fontsize=16)
-# axes8[1].set_title("Negative reviews", fontsize=16)
-
-# axes8[0].set_ylabel("Number of reviews", fontsize=12)
-# axes8[1].set_ylabel("Number of reviews", fontsize=12)
-# axes8[0].set_xlabel("Stopword count in review", fontsize=12)
-# axes8[1].set_xlabel("Stopword count in review", fontsize=12)
-
-# st.pyplot(fig8)
-
-# st.subheader('What is the count of character in reviews?')
-# # Plotting character count for reviews
-# fig9, axes9 = plt.subplots(ncols = 2, figsize=(24, 6))
-
-# sns.despine()
-# sns.histplot(ax=axes9[0], x="Char_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Positive'], color='#72EEA4');
-# sns.histplot(ax=axes9[1], x="Char_count", data=reviews_dataset[reviews_dataset['Sentiment']=='Negative'], color='#F37D67');
-
-# axes9[0].set_title("Positive reviews", fontsize=16)
-# axes9[1].set_title("Negative reviews", fontsize=16)
-
-# axes9[0].set_ylabel("Number of reviews", fontsize=12)
-# axes9[1].set_ylabel("Number of reviews", fontsize=12)
-# axes9[0].set_xlabel("Character count in review", fontsize=12)
-# axes9[1].set_xlabel("Character count in review", fontsize=12)
-
-# st.pyplot(fig9)
-
 st.subheader('What are the most common words in positive reviews?')
 # Plotting a wordcloud for positive reviews
 positive = " ".join(review for review in reviews_dataset['Preprocessed_reviews'][reviews_dataset['Sentiment']=="Positive"])
@@ -328,7 +292,6 @@ fig33 = plt.figure(figsize=(15, 10))
 plt.imshow(wordcloud, interpolation='bilinear')
 plt.axis("off")
 st.pyplot(fig33)
-
 
 st.subheader('What are the most common words in negative reviews?')
 # Plotting wordcloud for negative reviews
