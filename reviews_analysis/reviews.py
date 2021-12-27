@@ -11,7 +11,7 @@ from matplotlib.backends.backend_agg import RendererAgg
 from wordcloud import WordCloud, STOPWORDS
 import streamlit as st
 
-st.title('Reviews Analysis")
+st.title('Reviews Analysis')
 
 st.set_page_config(layout="wide")
 
