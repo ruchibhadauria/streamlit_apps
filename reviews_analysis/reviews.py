@@ -11,6 +11,8 @@ from matplotlib.backends.backend_agg import RendererAgg
 from wordcloud import WordCloud, STOPWORDS
 import streamlit as st
 
+st.title('Reviews Analysis")
+
 st.set_page_config(layout="wide")
 
 st.markdown('Once there was a businessman having a good hotel in the city of Mussoorie near Mall Road. Well, what stuck your mind first when your heard about Mussoorie? 
