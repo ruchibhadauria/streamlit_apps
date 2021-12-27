@@ -14,7 +14,7 @@ from matplotlib.backends.backend_agg import RendererAgg
 
 st.title('Reviews Analysis')
 
-# st.set_page_config(layout="wide")
+st.set_page_config(layout="wide")
 
 matplotlib.use("agg")
 
